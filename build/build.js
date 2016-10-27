@@ -98,7 +98,7 @@ var compressJs = function () {
 
 //存储Js
 var saveJs = function () {
-    var file = require.resolve("../assets/define.js");
+    var file = require.resolve("../create/define.js");
     var code = fs.readFileSync(file).toString();
     [].concat(jsList).concat(pageList).forEach(function (mod) {
         code += mod.code.replace(/(define\()\s*(function|\{)/, `$1"${mod.mid}", $2`);

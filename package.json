@@ -3,9 +3,8 @@
     "version": "2.0.0",
     "description": "seekJs的命令行工具",
     "bin": {
-        "seek": "./bin/cli.js"
+        "seek": "./cli.js"
     },
-    "main": "bin/main.js",
     "author": {
         "name": "Li",
         "email": "61114579@qq.com"
