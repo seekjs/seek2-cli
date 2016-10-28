@@ -18,7 +18,7 @@ exports.create = function(){
         var type = args.type || "base";
         var projectDir = `${rootPath}/${args.project}`;
         cmd(`cp -r ${skPath}/create/${type} ${projectDir}`);
-        cmd(`npm install`, projectDir);
+        cmd(`npm install seekjs`, projectDir);
         log("good, project create success!");
         args.open && cmd(`open ${projectDir}/index.html`);
     }else{

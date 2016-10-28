@@ -4,13 +4,11 @@
 
 seekjs.config({
     ns:{
-        "data.": "/data/",
-        "utils.": "/utils/",
+        "js.": "/js/",
         "css.": {
             path: "/css/",
             type: ".css"
-        },
-        "code.": "/plugins/code/"
+        }
     }
 });
 
@@ -19,21 +17,11 @@ require("css.class");
 
 var app = require("sys.app");
 
+app.addView(require("js.view"));
+app.addPipe(require("js.pipe"));
+
 app.config({
-    path: `/pages/`,
-    useAnimate: true
+    path: `/pages/`
 });
-
-app.pipeEx = require("utils.pipe");
-
-var Lang = require("utils.Lang");
-
-app.onInit = function(){
-    window.$Lang = Lang.getLang(localStorage.lang);
-};
-
-if(!localStorage.lang){
-    localStorage.lang = "cn";
-}
 
 app.init("home");
