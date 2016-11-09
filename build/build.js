@@ -18,8 +18,8 @@ global.cfg = {
     //sysFile: "/Users/likaituan/github/seekjs/seek.js",
     sysPath: "",        //系统路径
     rootPath: process.cwd(),       //项目根路径
-    index: "/Users/likaituan/wecash/projects/haiwai/2cash_admin/index.html",       //首页HTML
-    dist: "/Users/likaituan/wecash/projects/haiwai/2cash_admin/dist",          //输出目录
+    //index: "/Users/likaituan/wecash/projects/haiwai/2cash_admin/index.html",       //首页HTML
+    //dist: "/Users/likaituan/wecash/projects/haiwai/2cash_admin/dist",          //输出目录
     version: "0.0.1",
     excludes: [
         "utils.testData",

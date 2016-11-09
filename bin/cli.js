@@ -3,12 +3,14 @@
 
 var fs = require("fs");
 var path = require("path");
-var {getArgs,log,end,cmd} = require("ifun");
-var pk = require("./package.json");
+var {getArgs,log,end,cmd,requireJson} = require("ifun");
+var pk = require("../package.json");
 
 var args = getArgs("cmd");
 var rootPath = args.dir || process.cwd();
 var skPath = __dirname;
+
+exports["3in1"] = require("./3in1");
 
 //新建seek项目
 exports.create = function(){
@@ -31,12 +33,9 @@ exports.build = function(){
     args = getArgs("cmd", "env");
 
     var file = path.resolve("./seek.config");
-    var cfg = req(file);
-    var gen = req("../build/build");
+    var cfg = requireJson(file);
+    var gen = require("../build/build");
     log(args);
-    if(!args.env) {
-        end("please enter a env!");
-    }
     gen.init(cfg, args);
 };
 
