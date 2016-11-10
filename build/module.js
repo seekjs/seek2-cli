@@ -43,6 +43,7 @@ exports.getMod = function(mid, referUrl, js){
 //分析依赖
 var isLoaded = {};
 exports.parseDeps = function(mod, list){
+    console.log({mod,list});
     var referUrl = mod.url;
     if(!isLoaded[referUrl]){
         isLoaded[referUrl] = true;
@@ -58,6 +59,7 @@ exports.parseDeps = function(mod, list){
                 return "";
             }else {
                 mid = shortMid[mid] || mid;
+                console.log({mid,referUrl});
                 var subMod = exports.getMod(mid, referUrl, true);
                 //jsList.push(subMod);
                 exports.parseDeps(subMod, jsList);

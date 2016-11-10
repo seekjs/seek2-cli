@@ -11,6 +11,7 @@ var rootPath = args.dir || process.cwd();
 var skPath = __dirname;
 
 exports["3in1"] = require("./3in1");
+exports.build = require("./build");
 
 //新建seek项目
 exports.create = function(){
@@ -29,7 +30,7 @@ exports.create = function(){
 };
 
 //build项目
-exports.build = function(){
+exports.build_bak = function(){
     args = getArgs("cmd", "env");
 
     var file = path.resolve("./seek.config");

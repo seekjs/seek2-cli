@@ -159,6 +159,7 @@ exports.init = function (cfgs, args) {
     config.setConfig(cfg.entry);//step2: 获取模块ID配置
     config.setMVCPaths(cfg.entry);//step3: 获取MVC路径配置
     module.parseDeps(cfg.entry, jsList);//step4: 获取入口文件的依赖
+    return;
     page.getDeps(); //step5: 获取所有单页的依赖
     chkItems(); //s6-s7
     cfg.show && log({alias, ns, paths, cfg, pages, jsList, pageList, tpList, cssList, imgList});
