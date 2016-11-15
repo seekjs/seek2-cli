@@ -179,7 +179,7 @@ module.exports =  function(){
     saveFile(`${distDir}/app.css`, cssCode);
     saveFile(`${distDir}/index.html`, indexCode);
     imageList.forEach(saveImage);
-    //cmd(`babel ${appJs} -d ${appJs} --compact=auto`);
-    //cmd(`uglifyjs ${appJs} -o ${appJs}`);
+    cmd(`babel ${appJs} -o ${appJs} --compact=true --presets=latest`);
+    cmd(`uglifyjs ${appJs} -o ${appJs}`);
     log("generate success!");
 };
