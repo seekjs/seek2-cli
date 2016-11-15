@@ -10,6 +10,7 @@
         "email": "61114579@qq.com"
     },
     "dependencies": {
+        "babel-preset-latest": "^6.16.0",
         "ifun": "latest"
     },
     "repository": {
