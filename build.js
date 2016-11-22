@@ -1,5 +1,4 @@
 var fs = require("fs");
-var template = require("./template");
 var {log,getArgs,requireJson,cmd} = require('ifun');
 
 var timestamp = Date.now();
@@ -28,7 +27,7 @@ var imageList = [];
 
 var parseModule = function (mid, code) {
     return `\n\n
-    modules["${mid}"] = function(require, exports, module){
+    modules["${mid}"] = function(require, exports, module, __dirname, __filename){
         ${code}
         return module.exports;
     };`;
@@ -39,9 +38,10 @@ var getCode = function(file){
 };
 
 var getConfig = function(code){
-    code = code.replace(/seekjs\.config\(([\s\S]+?)\);/, function(_,json){
-        json = new Function(`return ${json}`)();
-        Object.assign(cfg, json);
+    code = code.replace(/seekjs\.config\(([\s\S]+?)\);/, function(_,jsonStr){
+        var json = seekjs.getJson(jsonStr);
+        seekjs.config(json);
+        //Object.assign(cfg, json);
         return "";
     });
     jsCode += parseModule("root.main", code);
@@ -67,7 +67,8 @@ var getUrl = function(mid){
 var chkModule = function(mid){
     var isExistMid = jsList.some(x=>x.mid==mid) || cssList.some(x=>x.mid==mid);
     if(!isExistMid) {
-        var url = getUrl(mid);
+        //var url = getUrl(mid);
+        var url = seekjs.getPath(mid);
         var code = getCode(url);
         code = chkCode(code);
 
@@ -144,15 +145,28 @@ var saveFile = function(file, code){
 
 module.exports =  function(){
     var args = getArgs("cmd");
-    cfg.rootPath = args.dir || process.cwd();
-    cfg.sysPath = args.sysPath;
+    cfg.rootPath = args.dir || process.cwd() + "/";
+    var indexCode = getCode(`${cfg.rootPath}/index.html`).replace(/src\s*=\s*["'](.+?)\/module\.js["']/, (_, sysPath)=>{
+        cfg.sysPath = args.sysPath || `${cfg.rootPath}/${sysPath}/`;
+        return `src="app.js?${timestamp}"`;
+    });
+    log({cfg});
+    require(`${cfg.sysPath}/module`).init({
+        rootPath: cfg.rootPath,
+        sysPath: cfg.sysPath,
+        getCode: getCode
+    });
+    //cfg.ns["sys."] = cfg.sysPath;
+    //cfg.ns["root."] = cfg.rootPath;
+    //seekjs.sysPath = cfg.sysPath;
+    //seekjs.rootPath = cfg.rootPath;
+    log({seekjs});
+
     Object.assign(cfg, requireJson(`${cfg.rootPath}/seek.config.js`));
     Object.assign(cfg, args);
     cfg.entryFile = `${cfg.rootPath}/main.js`;
     var entryContent = getCode(cfg.entryFile);
     getConfig(entryContent);
-    cfg.ns["sys."] = args.sysPath;
-    cfg.ns["root."] = cfg.rootPath;
     chkCode(entryContent);
     var pagesPath = `${cfg.rootPath}/pages`;
     fs.readdirSync(pagesPath).forEach(page => {
@@ -163,21 +177,20 @@ module.exports =  function(){
         require("root.main");
     }`;
 
-    var indexCode = getCode(`${cfg.rootPath}/index.html`).replace("node_modules/seekjs/module.js",`app.js?${timestamp}`);
     indexCode = indexCode.replace('</head>', `<link rel="stylesheet" href="app.css?${timestamp}" type="text/css" />`);
     indexCode = chkImage(indexCode);
 
     log({cfg, cssList, jsList, imageList});
 
-    var distDir = `${cfg.rootPath}/dist`;
-    if(fs.existsSync(distDir)){
-        cmd(`rm -rf ${distDir}`);
+    var distPath = `${cfg.rootPath}/dist`;
+    if(fs.existsSync(distPath)){
+        cmd(`rm -rf ${distPath}`);
     }
-    cmd(`mkdir ${distDir}`);
-    var appJs = `${distDir}/app.js`;
+    cmd(`mkdir ${distPath}`);
+    var appJs = `${distPath}/app.js`;
     saveFile(appJs, jsCode);
-    saveFile(`${distDir}/app.css`, cssCode);
-    saveFile(`${distDir}/index.html`, indexCode);
+    saveFile(`${distPath}/app.css`, cssCode);
+    saveFile(`${distPath}/index.html`, indexCode);
     imageList.forEach(saveImage);
     cmd(`babel ${appJs} -o ${appJs} --compact=true --presets=latest`);
     cmd(`uglifyjs ${appJs} -o ${appJs}`);

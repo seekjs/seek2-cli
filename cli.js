@@ -4,7 +4,7 @@
 var fs = require("fs");
 var path = require("path");
 var {getArgs,log,end,cmd,requireJson} = require("ifun");
-var pk = require("../package.json");
+var pk = require("./package.json");
 
 var args = getArgs("cmd");
 var rootPath = args.dir || process.cwd();
