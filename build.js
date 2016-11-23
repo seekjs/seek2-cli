@@ -1,15 +1,13 @@
 var fs = require("fs");
 var {log,getArgs,requireJson,cmd} = require('ifun');
+var template;
 
 var timestamp = Date.now();
 
-var cfg = {
-    ns: {},
-    alias: {}
-};
-
+var cfg = {};
 var cssCode = "";
 var jsCode = `
+window.log = console.log;
 var modules = {};
 var require = function (mid) {
     var module = {};
@@ -26,6 +24,9 @@ var imageList = [];
 
 
 var parseModule = function (mid, code) {
+    if(mid.endsWith(".json")){
+        return `modules["${mid}"] = ${code};`;
+    }
     return `\n\n
     modules["${mid}"] = function(require, exports, module, __dirname, __filename){
         ${code}
@@ -47,28 +48,14 @@ var getConfig = function(code){
     jsCode += parseModule("root.main", code);
 };
 
-var getUrl = function(mid){
-    for(var k in cfg.alias){
-        if(mid==k){
-            return cfg.rootPath + cfg.alias[k];
-        }
-    }
-    for(var k in cfg.ns){
-        if(mid.startsWith(k)){
-            let item = cfg.ns[k];
-            let path = item.path || item;
-            let ext = item.type || ".js";
-            return (k=="sys."?"":cfg.rootPath) + mid.replace(k, path) + ext;
-        }
-    }
-    return `${cfg.sysPath}node/${mid}.js`;
-};
-
 var chkModule = function(mid){
     var isExistMid = jsList.some(x=>x.mid==mid) || cssList.some(x=>x.mid==mid);
     if(!isExistMid) {
-        //var url = getUrl(mid);
         var url = seekjs.getPath(mid);
+        if(url.endsWith(".sk")) {
+            return chkSkPage(mid, url);
+        }
+
         var code = getCode(url);
         code = chkCode(code);
 
@@ -83,7 +70,7 @@ var chkModule = function(mid){
 };
 
 var chkCode = function(code){
-    code = code.replace(/require\(\"(.+?)\"\)/g, function(_,mid){
+    code = code.replace(/(?:require|usePlugin)\(["'](.+?)["']\s*[),]/g, function(_,mid){
         chkModule(mid);
         return _;
     });
@@ -122,7 +109,7 @@ var saveImage = function(item){
     cmd(`cp ${item.srcImage} ${cfg.rootPath}/dist/${item.newImage}`);
 };
 
-var chkSkPage = function(page, file){
+var chkSkPage = function(mid, file){
     var code = getCode(file);
     code = chkCode(code);
     var _jsCode = /<script.*?>([\s\S]+?)<\/script>/.test(code) ? RegExp.$1 : "";
@@ -135,7 +122,7 @@ var chkSkPage = function(page, file){
         ${tpCode}
     };
     ${_jsCode}`;
-    jsCode += parseModule(`page.${page}`, _jsCode);
+    jsCode += parseModule(mid, _jsCode);
     cssCode += `\n\n${_cssCode}`;
 };
 
@@ -145,32 +132,27 @@ var saveFile = function(file, code){
 
 module.exports =  function(){
     var args = getArgs("cmd");
-    cfg.rootPath = args.dir || process.cwd() + "/";
-    var indexCode = getCode(`${cfg.rootPath}/index.html`).replace(/src\s*=\s*["'](.+?)\/module\.js["']/, (_, sysPath)=>{
-        cfg.sysPath = args.sysPath || `${cfg.rootPath}/${sysPath}/`;
+    rootPath = cfg.rootPath = args.dir || process.cwd() + "/";
+    var indexCode = getCode(`${rootPath}/index.html`).replace(/src\s*=\s*["'](.+?)\/module\.js["']/, (_, _sysPath)=>{
+        sysPath = cfg.sysPath = args.sysPath || `${rootPath}/${_sysPath}/`;
         return `src="app.js?${timestamp}"`;
     });
-    log({cfg});
-    require(`${cfg.sysPath}/module`).init({
+    template = require(`${sysPath}/template`);
+    require(`${sysPath}/module`).init({
         rootPath: cfg.rootPath,
         sysPath: cfg.sysPath,
         getCode: getCode
     });
-    //cfg.ns["sys."] = cfg.sysPath;
-    //cfg.ns["root."] = cfg.rootPath;
-    //seekjs.sysPath = cfg.sysPath;
-    //seekjs.rootPath = cfg.rootPath;
-    log({seekjs});
 
-    Object.assign(cfg, requireJson(`${cfg.rootPath}/seek.config.js`));
+    Object.assign(cfg, requireJson(`${rootPath}/seek.config.js`));
     Object.assign(cfg, args);
     cfg.entryFile = `${cfg.rootPath}/main.js`;
     var entryContent = getCode(cfg.entryFile);
     getConfig(entryContent);
     chkCode(entryContent);
-    var pagesPath = `${cfg.rootPath}/pages`;
-    fs.readdirSync(pagesPath).forEach(page => {
-        chkSkPage(page.replace(".sk",""), `${pagesPath}/${page}`);
+    var pagePath = `${rootPath}/pages`;
+    fs.readdirSync(pagePath).forEach(page => {
+        chkSkPage("page." + page.replace(".sk",""), `${pagePath}/${page}`);
     });
     jsCode += `\n\n
     window.onload = function(){
@@ -192,7 +174,7 @@ module.exports =  function(){
     saveFile(`${distPath}/app.css`, cssCode);
     saveFile(`${distPath}/index.html`, indexCode);
     imageList.forEach(saveImage);
-    cmd(`babel ${appJs} -o ${appJs} --compact=true --presets=latest`);
-    cmd(`uglifyjs ${appJs} -o ${appJs}`);
+    //cmd(`babel ${appJs} -o ${appJs} --compact=true --presets=latest`);
+    //cmd(`uglifyjs ${appJs} -o ${appJs}`);
     log("generate success!");
 };
