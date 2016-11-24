@@ -9,9 +9,9 @@ var cssCode = "";
 var jsCode = `
 window.log = console.log;
 var modules = {};
-var require = function (mid) {
+var require = function (mid, iniExports) {
     var module = {};
-    var exports = module.exports = {};
+    var exports = module.exports = iniExports || {};
     return modules[mid] && modules[mid](require, exports, module);
 };`;
 
@@ -150,7 +150,7 @@ module.exports =  function(){
     var entryContent = getCode(cfg.entryFile);
     getConfig(entryContent);
     chkCode(entryContent);
-    var pagePath = `${rootPath}/pages`;
+    var pagePath = `${rootPath}/pages2`;
     fs.readdirSync(pagePath).forEach(page => {
         chkSkPage("page." + page.replace(".sk",""), `${pagePath}/${page}`);
     });
