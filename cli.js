@@ -7,39 +7,17 @@ var {getArgs,log,end,cmd,requireJson} = require("ifun");
 var pk = require("./package.json");
 
 var args = getArgs("cmd");
-var rootPath = args.dir || process.cwd();
+var ops = {};
+ops.rootPath = args.dir || process.cwd();
 var skPath = __dirname;
 
 exports["3in1"] = require("./3in1");
+exports.create = require("./create");
 exports.build = require("./build");
 
-//新建seek项目
-exports.create = function(){
-    args = getArgs("cmd", "project");
-
-    if(args.project) {
-        var type = args.type || "base";
-        var projectDir = `${rootPath}/${args.project}`;
-        cmd(`cp -r ${skPath}/create/${type} ${projectDir}`);
-        cmd(`npm install seekjs`, projectDir);
-        log("good, project create success!");
-        args.open && cmd(`open ${projectDir}/index.html`);
-    }else{
-        log("please enter your project name before!");
-    }
+exports.init = function(){
+    exports.create("init");
 };
-
-//build项目
-exports.build_bak = function(){
-    args = getArgs("cmd", "env");
-
-    var file = path.resolve("./seek.config");
-    var cfg = requireJson(file);
-    var gen = require("../build/build");
-    log(args);
-    gen.init(cfg, args);
-};
-
 
 //更新脚手架
 exports.up = exports.update = function(){
@@ -63,7 +41,7 @@ if(args.v){
 }else if(args.cmd){
     args.cmd = args.cmd.toLowerCase();
     if(exports[args.cmd]){
-        exports[args.cmd]();
+        exports[args.cmd](ops);
     } else {
         log(`sorry, no such command '${args.cmd}'!`);
     }

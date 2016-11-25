@@ -150,7 +150,7 @@ module.exports =  function(){
     var entryContent = getCode(cfg.entryFile);
     getConfig(entryContent);
     chkCode(entryContent);
-    var pagePath = `${rootPath}/pages2`;
+    var pagePath = `${rootPath}/pages`;
     fs.readdirSync(pagePath).forEach(page => {
         chkSkPage("page." + page.replace(".sk",""), `${pagePath}/${page}`);
     });
