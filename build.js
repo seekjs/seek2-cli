@@ -7,7 +7,9 @@ var timestamp = Date.now();
 var cfg = {};
 var cssCode = "";
 var jsCode = `
-window.log = console.log;
+var log = function(...args){
+    console.log.apply(console, args);
+};
 var modules = {};
 var run_modules = {};
 var require = function (mid, iniExports) {
