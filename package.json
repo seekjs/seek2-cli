@@ -10,10 +10,10 @@
     "email": "61114579@qq.com"
   },
   "dependencies": {
-    "babel-core": "latest",
-    "babel-preset-latest": "^6.16.0",
-    "uglify-js": "latest",
-    "ifun": "latest"
+    "babel-core": "6.18.2",
+    "babel-preset-latest": "6.16.0",
+    "ifun": "0.2.5",
+    "uglify-js": "2.7.4"
   },
   "repository": {
     "type": "git",

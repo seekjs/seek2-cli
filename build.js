@@ -9,15 +9,19 @@ var cssCode = "";
 var jsCode = `
 window.log = console.log;
 var modules = {};
+var run_modules = {};
 var require = function (mid, iniExports) {
-    if(modules[mid]){
+    if(!run_modules[mid] && modules[mid] || mid.startsWith("page.") || mid.startsWith("seekjs-plugin-") ){
+        modules[mid].mid = mid;
         if(typeof modules[mid]=="object"){
-            return modules[mid];
+            run_modules[mid] = modules[mid];
+        }else{
+            var module = {};
+            var exports = module.exports = iniExports || {};
+            run_modules[mid] = modules[mid](require, exports, module);
         }
-        var module = {};
-        var exports = module.exports = iniExports || {};
-        return modules[mid](require, exports, module);
     }
+    return run_modules[mid];
 };`;
 
 
@@ -149,7 +153,11 @@ module.exports =  function(){
         getCode: getCode
     });
 
-    Object.assign(cfg, requireJson(`${rootPath}/seek.config.js`));
+    var seekConfig = requireJson(`${rootPath}/seekjs.config.js`);
+    if(typeof seekConfig=="function"){
+        seekConfig = seekConfig(args);
+    }
+    Object.assign(cfg, seekConfig);
     Object.assign(cfg, args);
     cfg.entryFile = `${cfg.rootPath}/main.js`;
     var entryContent = getCode(cfg.entryFile);
@@ -159,11 +167,23 @@ module.exports =  function(){
     fs.readdirSync(pagePath).forEach(page => {
         chkSkPage("page." + page.replace(".sk",""), `${pagePath}/${page}`);
     });
+    (cfg.extraModules||[]).forEach(chkModule);
     jsCode += `\n\n
     window.onload = function(){
         require("root.main");
     }`;
-
+    if(!args.noBabel) {
+        jsCode = require('babel-core').transform(jsCode, {
+            presets: [require('babel-preset-latest')],
+            compact: true
+        }).code;
+    }
+    if(!args.noUglify) {
+        jsCode = require("uglify-js").minify(jsCode, {
+            mangle: false,
+            fromString: true
+        }).code;
+    }
     indexCode = indexCode.replace('</head>', `<link rel="stylesheet" href="app.css?${timestamp}" type="text/css" />`);
     indexCode = chkImage(indexCode);
 
