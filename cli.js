@@ -7,9 +7,13 @@ var {getArgs,log,end,cmd,requireJson} = require("ifun");
 var pk = require("./package.json");
 
 var args = getArgs("cmd");
-var ops = {};
-ops.rootPath = args.dir || process.cwd();
+var ua = {};
+ua.rootPath = args.dir || process.cwd();
 var skPath = __dirname;
+ua.engine = {name,version};
+ua.user = process.env.USER || process.env.USERNAME;
+ua.sudo = process.platform!="win32"&&ua.user!="root" ? "sudo " : "";
+ua.npm = process.platform=="win32" ? "npm.cmd" : "npm";
 
 exports["3in1"] = require("./3in1");
 exports.create = require("./create");
@@ -19,20 +23,16 @@ exports.init = function(){
     exports.create("init");
 };
 
-//更新脚手架
-exports.up = exports.update = function(){
-    log("now is updating, please wait a moment...");
-    cp.exec(`${prefix}npm update -g seek-cli`, function callback(error, stdout, stderr) {
-        log(stdout);
-    });
-};
 
-//重新安装脚手架
-exports.install = function(){
-    log("now is reinstalling, please wait a moment...");
-    cp.exec(`${prefix}npm install -g seek-cli`, function callback(error, stdout, stderr) {
-        log(stdout);
-    });
+//更新
+exports.update = function(ua){
+    args = getArgs("cmd", "version");
+    log("now is updating, please wait a moment...");
+    var cmdExp = `${ua.sudo}${ua.npm} install -g ${ua.engine.name}`;
+    if(args.version){
+        cmdExp += `@${args.version}`;
+    }
+    cmd(cmdExp);
 };
 
 //查看seekjs版本
@@ -41,10 +41,10 @@ if(args.v){
 }else if(args.cmd){
     args.cmd = args.cmd.toLowerCase();
     if(exports[args.cmd]){
-        exports[args.cmd](ops);
+        exports[args.cmd](ua);
     } else {
         log(`sorry, no such command '${args.cmd}'!`);
     }
 } else {
-    log(`welcome to use seekjs,\n seekjs current version is ${pk.version}!`);
+    log(`welcome to use seekjs-cli,\n seekjs-cli current version is ${pk.version}!`);
 }
