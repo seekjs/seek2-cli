@@ -10,7 +10,7 @@
     "email": "61114579@qq.com"
   },
   "dependencies": {
-    "babel": "latest",
+    "babel-core": "latest",
     "babel-preset-latest": "^6.16.0",
     "uglify-js": "latest",
     "ifun": "latest"
