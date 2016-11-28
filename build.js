@@ -10,9 +10,14 @@ var jsCode = `
 window.log = console.log;
 var modules = {};
 var require = function (mid, iniExports) {
-    var module = {};
-    var exports = module.exports = iniExports || {};
-    return modules[mid] && modules[mid](require, exports, module);
+    if(modules[mid]){
+        if(typeof modules[mid]=="object"){
+            return modules[mid];
+        }
+        var module = {};
+        var exports = module.exports = iniExports || {};
+        return modules[mid](require, exports, module);
+    }
 };`;
 
 
