@@ -1,22 +1,22 @@
 {
-    "name": "seekjs-cli",
-    "version": "2.0.0",
-    "description": "seekJs的命令行工具",
-    "bin": {
-        "seekjs": "./cli.js"
-    },
-    "author": {
-        "name": "Li",
-        "email": "61114579@qq.com"
-    },
-    "dependencies": {
-        "babel": "latest",
-        "babel-preset-latest": "^6.16.0",
-        "uglify-js": "latest",
-        "ifun": "latest"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git@github.com:seekjs-framework/seekjs-cli.git"
-    }
+  "name": "seekjs-cli",
+  "version": "2.0.1",
+  "description": "seekJs的命令行工具",
+  "bin": {
+    "seekjs": "./cli.js"
+  },
+  "author": {
+    "name": "Li",
+    "email": "61114579@qq.com"
+  },
+  "dependencies": {
+    "babel": "latest",
+    "babel-preset-latest": "^6.16.0",
+    "uglify-js": "latest",
+    "ifun": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:seekjs-framework/seekjs-cli.git"
+  }
 }
