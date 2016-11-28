@@ -37,7 +37,7 @@ exports.update = function(ua){
 
 //查看seekjs版本
 if(args.v){
-    log(pk.version);
+    log(version);
 }else if(args.cmd){
     args.cmd = args.cmd.toLowerCase();
     if(exports[args.cmd]){
@@ -46,5 +46,5 @@ if(args.v){
         log(`sorry, no such command '${args.cmd}'!`);
     }
 } else {
-    log(`welcome to use seekjs-cli,\n seekjs-cli current version is ${pk.version}!`);
+    log(`welcome to use seekjs-cli,\n seekjs-cli current version is ${version}!`);
 }
