@@ -15,9 +15,10 @@ ua.user = process.env.USER || process.env.USERNAME;
 ua.sudo = process.platform!="win32"&&ua.user!="root" ? "sudo " : "";
 ua.npm = process.platform=="win32" ? "npm.cmd" : "npm";
 
-exports["3in1"] = require("./3in1");
 exports.create = require("./create");
 exports.build = require("./build");
+exports["3in1"] = require("./3in1");
+exports["1sp3"] = require("./1sp3");
 
 exports.init = function(){
     exports.create("init");

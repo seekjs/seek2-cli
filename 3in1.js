@@ -1,32 +1,31 @@
 var fs = require('fs');
 var cp = require('child_process');
 
-module.exports =  function() {
-    var dir = "./js";
-    if(fs.existsSync(dir)){
-        cp.execSync(`rm -rf ${dir}`)
-    }
-    cp.execSync(`mkdir ${dir}`);
+var getCode = function(file, tag, prop){
+    var code = fs.readFileSync(file).toString().trim();
+    prop = prop || "";
+    return `<${tag+prop}>\n${code}\n</${tag}>\n\n`;
+};
 
-    fs.readdirSync("./utils").forEach(x=> {
-        var name = x.replace(".js", "");
-        var jsCode = fs.readFileSync("./utils/" + name + ".js");
-        var cssCode = fs.readFileSync("./styles/" + name + ".css");
-        var htmlCode = fs.readFileSync("./templates/" + name + ".html");
-        var code = "";
-        if (cssCode) {
-            code += `<style>\n${cssCode}\n</style>`;
-        }
-        if (htmlCode) {
-            if (code) code += "\n\n";
-            code += `<template>\n${htmlCode}\n</template>`;
-        }
-        if (jsCode) {
-            if (code) code += "\n\n";
-            code += `<script type="text/ecmascript-6">\n${jsCode}\n</script>`;
-        }
-        fs.writeFileSync("./js/" + name + ".sk", code);
+module.exports =  function(args) {
+    var js = args.js || "js";
+    var css = args.css || "css";
+    var tp = args.tp || "templates";
+    var page = args.page || "pages";
+    var pageDir = `./${page}`;
+
+    if(fs.existsSync(pageDir)){
+        cp.execSync(`rm -rf ${pageDir}`)
+    }
+    cp.execSync(`mkdir ${pageDir}`);
+
+    fs.readdirSync(`./${js}`).forEach(x=> {
+        var pageName = x.replace(".js", "");
+        var code = getCode(`./${css}/${pageName}.css`,"style") +
+                   getCode(`./${tp}/${pageName}.html`,"template") +
+                   getCode(`./${js}/${pageName}.js`,"script",`type="text/ecmascript-6"`);
+        fs.writeFileSync(`${pageDir}/${pageName}.sk`, code);
     });
 
-    console.log("generate success!");
+    console.log("3in1 success!");
 };
