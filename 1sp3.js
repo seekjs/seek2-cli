@@ -3,7 +3,7 @@ var cp = require('child_process');
 
 var setCode = function(code, file, tag){
     var re = new RegExp(`<${tag}.*?>([\\s\\S]+)<\\/${tag}>`,"i");
-    code = re.test(code) ? RegExp.$1.replace(/^\t|~\s{4}/mg,"") : "";
+    code = re.test(code) ? RegExp.$1.replace(/^\t|^\s{4}/mg,"") : "";
     fs.writeFileSync(file, code);
 };
 
