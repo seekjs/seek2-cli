@@ -15,10 +15,9 @@ module.exports =  function(args) {
 
     [js,css,tp].forEach(x=>{
         var dir = `./${x}`;
-        if(fs.existsSync(dir)){
-            cp.execSync(`rm -rf ${dir}`)
+        if(fs.existsSync(dir)==false) {
+            cp.execSync(`mkdir ${dir}`);
         }
-        cp.execSync(`mkdir ${dir}`);
     });
 
     fs.readdirSync(`./${page}`).forEach(x=> {

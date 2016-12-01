@@ -14,10 +14,9 @@ module.exports =  function(args) {
     var page = args.page || "pages";
     var pageDir = `./${page}`;
 
-    if(fs.existsSync(pageDir)){
-        cp.execSync(`rm -rf ${pageDir}`)
+    if(fs.existsSync(pageDir)==false){
+        cp.execSync(`mkdir ${pageDir}`);
     }
-    cp.execSync(`mkdir ${pageDir}`);
 
     fs.readdirSync(`./${js}`).forEach(x=> {
         var pageName = x.replace(".js", "");
