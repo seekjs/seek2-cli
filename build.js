@@ -45,10 +45,6 @@ var parseModule = function (mid, code) {
     };`;
 };
 
-var getCode = function(file){
-    return fs.readFileSync(file).toString().trim();
-};
-
 var getConfig = function(code){
     code = code.replace(/seekjs\.config\(([\s\S]+?)\);/, function(_,jsonStr){
         var json = seekjs.getJson(jsonStr);
@@ -131,31 +127,49 @@ var saveImage = function(item){
     cmd(`cp ${item.srcImage} ${cfg.rootPath}/dist/${item.newImage}`);
 };
 
-var chkSkPage = function(mid, file) {
-    var code = getCode(file);
-    code = chkCode(code);
-    var ops = {
-        mid,
-        jsCode: /<script.*?>([\s\S]+?)<\/script>/.test(code) ? RegExp.$1 : "",
-        tpCode: /<template.*?>([\s\S]+?)<\/template>/.test(code) ? RegExp.$1 : "",
-        cssCode: /<style.*?>([\s\S]+?)<\/style>/.test(code) ? RegExp.$1 : ""
-    };
-    chkPage(ops);
-};
+var chkPage = function(mid){
+    var skFile = seekjs.getPath(mid);
+    var _jsCode;
+    var _cssCode;
+    var _tpCode;
+    if(skFile.endsWith(".sk")){
+        var code = seekjs.getcode(skFile);
+        _cssCode = /<style.*?>([\s\S]+?)<\/style>/.test(code) ? RegExp.$1 : "";
+        _tpCode = /<template.*?>([\s\S]+?)<\/template>/.test(code) ? RegExp.$1 : "";
+        _jsCode = /<script.*?>([\s\S]+?)<\/script>/.test(code) ? RegExp.$1 : "";
+    }else{
+        var jsFile = skFile;
+        var cssFile;
+        var tpFile;
+        if(mid.startsWith("seekjs-plugin-")){
+            cssFile = jsFile.replace(/\.js/, ".css");
+            tpFile = jsFile.replace(/\.js/, ".html");
+        }else{
+            cssFile = seekjs.getPath(mid.replace("js.","css."));
+            tpFile = seekjs.getPath(mid.replace("js.","tp."));
+        }
+        _cssCode = seekjs.getCode(cssFile);
+        _tpCode = seekjs.getCode(tpFile);
+        _jsCode = seekjs.getCode(jsFile);
+    }
 
-var chkPage = function(ops){
-    var _tpCode = template.getJsCode(ops.tpCode);
-    var _jsCode = `
+    chkCode(_jsCode);
+    _tpCode = template.getJsCode(_tpCode);
+    _jsCode = `
     exports.getHTML = function($){
         ${_tpCode}
     };
-    ${ops.jsCode}`;
-    jsCode += parseModule(ops.mid, _jsCode);
-    cssCode += `\n\n${ops.cssCode}`;
+    ${_jsCode}`;
+    jsCode += parseModule(mid, _jsCode);
+    cssCode += `\n\n${_cssCode}`;
 };
 
 var saveFile = function(file, code){
     fs.writeFileSync(file, code);
+};
+
+var getCode = function(file){
+    return fs.readFileSync(file).toString().trim();
 };
 
 module.exports =  function(){
@@ -182,10 +196,18 @@ module.exports =  function(){
     var entryContent = getCode(cfg.entryFile);
     getConfig(entryContent);
     chkCode(entryContent);
-    var pagePath = `${rootPath}/pages`;
-    fs.readdirSync(pagePath).forEach(page => {
-        chkSkPage("page." + page.replace(".sk",""), `${pagePath}/${page}`);
+
+    log({cfg});
+    var dir = cfg.page || cfg.js;
+    var ns = cfg.page ? "page." : "js.";
+    var ext = cfg.page ? ".sk" : ".js";
+    fs.readdirSync(dir).forEach(page => {
+        if(page.endsWith(ext)) {
+            let mid = ns + page.replace(ext, "");
+            chkPage(mid);
+        }
     });
+
     (cfg.extraModules||[]).forEach(x=>chkModule(x));
     jsCode += `\n\n
     window.onload = function(){
