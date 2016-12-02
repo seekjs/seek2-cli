@@ -31,6 +31,7 @@ var rootPath;
 var sysPath;
 var cssList = [];
 var jsList = [];
+var pageList = [];
 var imageList = [];
 
 
@@ -52,63 +53,63 @@ var getConfig = function(code){
         //Object.assign(cfg, json);
         return "";
     });
-    jsCode += parseModule("root.main", code);
+    code = code.replace(/app\.config\(([\s\S]+?)\);/, function(_,jsonStr){
+        var json = seekjs.getJson(jsonStr);
+        getAppConfig(json);
+        return "";
+    });
+
+    return parseModule("root.main", code);
+};
+
+//配置信息
+var getAppConfig = function (_cfg) {
+    var ns = {};
+    var typeList = {js:".js", css:".css", tp:".html", page:".sk"};
+    for(let k in _cfg){
+        if(/^(page|js|css|tp)$/.test(k)){
+            ns[k] = {
+                path: _cfg[k],
+                type: typeList[k]
+            }
+        }
+    }
+    seekjs.config({ns});
 };
 
 var chkModule = function(mid, isPlugin){
-    var isExistMid = jsList.some(x=>x.mid==mid) || cssList.some(x=>x.mid==mid);
-    if(!isExistMid) {
-        var url = seekjs.getPath(mid);
+    var isJs = jsList.some(x=>x.mid==mid);
+    var isCss = cssList.some(x=>x.mid==mid);
+    if(!isJs && !isCss) {
         if(isPlugin) {
-            if (url.endsWith(".sk")) {
-                chkSkPage(mid, url);
-            }else{
-                var ops = {
-                    mid,
-                    jsCode: seekjs.getCode(url),
-                    cssCode: seekjs.getCode(url.replace(/\.js/,".css")),
-                    tpCode: seekjs.getCode(url.replace(/\.js/,".html"))
-                };
-                chkPage(ops);
-            }
-            return;
+            return chkPage(mid);
         }
-
+        var url = seekjs.getPath(mid);
         var code = getCode(url);
         code = chkCode(code);
 
         if (url.endsWith(".css")) {
             cssList.push({mid,url});
             cssCode += code;
+            isCss = true;
         } else {
             jsList.push({mid,url});
             jsCode += parseModule(mid,code);
         }
     }
+    log({mid,isCss})
+    return isCss;
 };
 
 var chkCode = function(code){
-    code = code.replace(/(require|usePlugin)\(["'](.+?)["']\s*[),]/g, function(_,key,mid){
-        chkModule(mid, key=="usePlugin");
+    code = code.replace(/require\(["'](.+?)["']\);?/g, function(_,mid){
+        return chkModule(mid) ? "" : _;
+    });
+    code = code.replace(/usePlugin\(["'](.+?)["']\s*[),]/g, function(_,mid){
+        chkModule(mid, true);
         return _;
     });
     return chkImage(code);
-};
-
-var imgIndex = 0;
-var parseImage = function(imageName, imageExt){
-    var srcImage = `${imageName}.${imageExt}`;
-    srcImage = cfg.rootPath + "/" + srcImage.replace("../","");
-    var item = imageList.filter(x=>srcImage==x.srcImage)[0];
-    var newImage;
-    if(item){
-        newImage = item.newImage;
-    }else {
-        var sn = ++imgIndex;
-        newImage = `${sn}.${imageExt}`;
-        imageList.push({srcImage, newImage});
-    }
-    return newImage;
 };
 
 var chkImage = function(code){
@@ -123,8 +124,24 @@ var chkImage = function(code){
     return code;
 };
 
+var imgIndex = 0;
+var parseImage = function(imageName, imageExt){
+    var srcImage = `${imageName}.${imageExt}`;
+    srcImage = rootPath + "/" + srcImage.replace("../","");
+    var item = imageList.filter(x=>srcImage==x.srcImage)[0];
+    var newImage;
+    if(item){
+        newImage = item.newImage;
+    }else {
+        var sn = ++imgIndex;
+        newImage = `${sn}.${imageExt}`;
+        imageList.push({srcImage, newImage});
+    }
+    return newImage;
+};
+
 var saveImage = function(item){
-    cmd(`cp ${item.srcImage} ${cfg.rootPath}/dist/${item.newImage}`);
+    cmd(`cp ${item.srcImage} ${rootPath}/dist/${item.newImage}`);
 };
 
 var chkPage = function(mid){
@@ -133,7 +150,7 @@ var chkPage = function(mid){
     var _cssCode;
     var _tpCode;
     if(skFile.endsWith(".sk")){
-        var code = seekjs.getcode(skFile);
+        var code = seekjs.getCode(skFile);
         _cssCode = /<style.*?>([\s\S]+?)<\/style>/.test(code) ? RegExp.$1 : "";
         _tpCode = /<template.*?>([\s\S]+?)<\/template>/.test(code) ? RegExp.$1 : "";
         _jsCode = /<script.*?>([\s\S]+?)<\/script>/.test(code) ? RegExp.$1 : "";
@@ -153,15 +170,20 @@ var chkPage = function(mid){
         _jsCode = seekjs.getCode(jsFile);
     }
 
-    chkCode(_jsCode);
+    _jsCode = chkCode(_jsCode);
+    _tpCode = chkCode(_tpCode);
+    _cssCode = chkCode(_cssCode);
+
     _tpCode = template.getJsCode(_tpCode);
     _jsCode = `
     exports.getHTML = function($){
         ${_tpCode}
     };
     ${_jsCode}`;
+    mid = mid.replace("js.", "page.");
     jsCode += parseModule(mid, _jsCode);
     cssCode += `\n\n${_cssCode}`;
+    pageList.push({mid,jsFile,cssFile,tpFile});
 };
 
 var saveFile = function(file, code){
@@ -174,7 +196,7 @@ var getCode = function(file){
 
 module.exports =  function(){
     var args = getArgs("cmd");
-    rootPath = cfg.rootPath = args.dir || process.cwd() + "/";
+    rootPath = cfg.rootPath = args.dir || process.cwd();
     var indexCode = getCode(`${rootPath}/index.html`).replace(/src\s*=\s*["'](.+?)\/module\.js["']/, (_, _sysPath)=>{
         sysPath = cfg.sysPath = args.sysPath || `${rootPath}/${_sysPath}/`;
         return `src="app.js?${timestamp}"`;
@@ -192,15 +214,16 @@ module.exports =  function(){
     }
     Object.assign(cfg, seekConfig);
     Object.assign(cfg, args);
-    cfg.entryFile = `${cfg.rootPath}/main.js`;
+    cfg.entryFile = `${rootPath}/main.js`;
     var entryContent = getCode(cfg.entryFile);
-    getConfig(entryContent);
-    chkCode(entryContent);
+    entryContent = getConfig(entryContent);
+    log({ns:seekjs.ns})
+    entryContent = chkCode(entryContent);
+    jsCode += entryContent;
 
-    log({cfg});
-    var dir = cfg.page || cfg.js;
-    var ns = cfg.page ? "page." : "js.";
-    var ext = cfg.page ? ".sk" : ".js";
+    var dir = seekjs.ns.page ? seekjs.ns.page.path : seekjs.ns.js.path;
+    var ns = seekjs.ns.page ? "page." : "js.";
+    var ext = seekjs.ns.page ? ".sk" : ".js";
     fs.readdirSync(dir).forEach(page => {
         if(page.endsWith(ext)) {
             let mid = ns + page.replace(ext, "");
@@ -228,9 +251,9 @@ module.exports =  function(){
     indexCode = indexCode.replace('</head>', `<link rel="stylesheet" href="app.css?${timestamp}" type="text/css" />`);
     indexCode = chkImage(indexCode);
 
-    log({cfg, cssList, jsList, imageList});
+    log({cfg, cssList, jsList, pageList, imageList});
 
-    var distPath = `${cfg.rootPath}/dist`;
+    var distPath = `${rootPath}/dist`;
     if(fs.existsSync(distPath)){
         cmd(`rm -rf ${distPath}`);
     }
