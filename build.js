@@ -85,6 +85,7 @@ var chkModule = function(mid, isPlugin){
             return chkPage(mid);
         }
         var url = seekjs.getPath(mid);
+        log({url});
         var code = getCode(url);
         code = chkCode(code);
 
@@ -255,9 +256,9 @@ module.exports =  function(){
 
     var distPath = `${rootPath}/dist`;
     if(fs.existsSync(distPath)){
-        cmd(`rm -rf ${distPath}`);
+        //cmd(`rm -rf ${distPath}`);
     }
-    cmd(`mkdir ${distPath}`);
+    //cmd(`mkdir ${distPath}`);
     var appJs = `${distPath}/app.js`;
     saveFile(appJs, jsCode);
     saveFile(`${distPath}/app.css`, cssCode);

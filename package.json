@@ -1,6 +1,6 @@
 {
   "name": "seekjs-cli",
-  "version": "2.0.13",
+  "version": "2.0.15",
   "description": "seekJs的命令行工具",
   "bin": {
     "seekjs": "./cli.js"
@@ -9,11 +9,13 @@
     "name": "Li",
     "email": "61114579@qq.com"
   },
-  "dependencies": {
+  "devDependencies": {
     "babel-core": "6.18.2",
     "babel-preset-latest": "6.16.0",
-    "ifun": "0.2.5",
     "uglify-js": "2.7.4"
+  },
+  "dependencies": {
+    "ifun": "0.2.5"
   },
   "repository": {
     "type": "git",
