@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+global.log = console.log;
+
 var fs = require("fs");
 var {getArgs,log,cmd} = require("ifun");
 var {name,version} = require("./package.json");
@@ -14,11 +16,13 @@ var ua = {};
     ua.npm = process.platform=="win32" ? "npm.cmd" : "npm";
 
 var cmdList = require("./cmdList");
-cmdList.create = require("./create");
-cmdList.build = require("./build");
-cmdList["3in1"] = require("./3in1");
-cmdList["1sp3"] = require("./1sp3");
-
+Object.assign(cmdList,{
+    create: require("./create"),
+    build: require("./build"),
+    "export-plugin": require("./export-plugin"),
+    "3in1": require("./3in1"),
+    "1sp3": require("./1sp3")
+});
 
 //查看seekjs版本
 if(args.v){

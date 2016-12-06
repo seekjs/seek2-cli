@@ -31,30 +31,58 @@ var getJson = function (ua) {
 
 //add View
 exports.add = function (ua) {
-    var args = getArgs("cmd","act","view");
+    var args = getArgs("cmd", "view");
     getJson(ua).forEach(item => {
         if(item.path){
-            cmd(`touch ${item.path}/${view+item.type}`);
+            cmd(`touch ${item.path}/${args.view+item.type}`);
         }
     });
 };
 
 //delete View
 exports.del = function (ua) {
-    var args = getArgs("cmd","act","view");
+    var args = getArgs("cmd", "view");
     getJson(ua).forEach(item => {
         if(item.path){
-            cmd(`rm ${item.path}/${view+item.type}`);
+            cmd(`rm ${item.path}/${args.view+item.type}`);
         }
     });
 };
 
 //rename View
 exports.rename = function(ua){
-    var args = getArgs("cmd","act","oldView", "newView");
+    var args = getArgs("cmd", "oldView", "newView");
+    var hasView = false;
     getJson(ua).forEach(item => {
         if(item.path){
-            cmd(`mv ${item.path}/${oldView+item.type} ${item.path}/${newView+item.type}`);
+            var srcFile = `${item.path}/${args.oldView+item.type}`;
+            if(fs.existsSync(srcFile)){
+                hasView = true;
+                cmd(`mv ${srcFile} ${item.path}/${args.newView+item.type}`);
+                log(`rename ${args.oldView+item.type} to ${args.newView+item.type} success!`);
+            }
         }
     });
+    if(!hasView){
+        log(`sorry, the view "${args.oldView}" is no exist!`);
+    }
+};
+
+//copy View
+exports.copy = function(ua){
+    var args = getArgs("cmd", "srcView", "newView");
+    var hasView = false;
+    getJson(ua).forEach(item => {
+        if(item.path){
+            var srcFile = `${item.path}/${args.srcView+item.type}`;
+            if(fs.existsSync(srcFile)){
+                hasView = true;
+                cmd(`cp ${srcFile} ${item.path}/${args.newView+item.type}`);
+                log(`copy ${args.srcView+item.type} to ${args.newView+item.type} success!`);
+            }
+        }
+    });
+    if(!hasView){
+        log(`sorry, the view "${args.srcView}" is no exist!`);
+    }
 };
