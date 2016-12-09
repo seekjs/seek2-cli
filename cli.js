@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 
-global.log = console.log;
+global.log = function(...args){
+    console.log.apply(console, args);
+};
+var app = require("sys.app");
+log({app});
 
 var fs = require("fs");
-var {getArgs,log,cmd} = require("ifun");
+var {getArgs,cmd} = require("ifun");
 var {name,version} = require("./package.json");
 
 var args = getArgs("cmd");

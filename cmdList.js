@@ -49,6 +49,16 @@ exports.del = function (ua) {
     });
 };
 
+//edit View
+exports.edit = function (ua) {
+    var args = getArgs("cmd", "view");
+    getJson(ua).forEach(item => {
+        if(item.path){
+            cmd(`node /tools/edit.js ${item.path}/${args.view+item.type}`);
+        }
+    });
+};
+
 //rename View
 exports.rename = function(ua){
     var args = getArgs("cmd", "oldView", "newView");

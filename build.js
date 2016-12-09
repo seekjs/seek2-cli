@@ -29,6 +29,7 @@ var require = function (mid, iniExports) {
 
 var rootPath;
 var sysPath;
+var distPath;
 var cssList = [];
 var jsList = [];
 var pageList = [];
@@ -142,7 +143,7 @@ var parseImage = function(imageName, imageExt){
 };
 
 var saveImage = function(item){
-    cmd(`cp ${item.srcImage} ${rootPath}/dist/${item.newImage}`);
+    cmd(`cp ${item.srcImage} ${distPath}/${item.newImage}`);
 };
 
 var chkPage = function(mid){
@@ -215,6 +216,7 @@ module.exports =  function(){
     }
     Object.assign(cfg, seekConfig);
     Object.assign(cfg, args);
+    distPath = cfg.distPath = cfg.distPath || `${rootPath}/dist`;
     cfg.entryFile = `${rootPath}/main.js`;
     var entryContent = getCode(cfg.entryFile);
     entryContent = getConfig(entryContent);
@@ -254,11 +256,10 @@ module.exports =  function(){
 
     log({cfg, cssList, jsList, pageList, imageList});
 
-    var distPath = `${rootPath}/dist`;
     if(fs.existsSync(distPath)){
-        //cmd(`rm -rf ${distPath}`);
+        cmd(`rm -rf ${distPath}`);
     }
-    //cmd(`mkdir ${distPath}`);
+    cmd(`mkdir ${distPath}`);
     var appJs = `${distPath}/app.js`;
     saveFile(appJs, jsCode);
     saveFile(`${distPath}/app.css`, cssCode);
