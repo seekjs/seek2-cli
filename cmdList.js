@@ -10,7 +10,7 @@ exports.init = function(ua){
     if(!fs.existsSync(`${mPath}/sys.seek.js`)){
         var smPath = `${ua.cliPath}/sys_modules`;
         fs.readdirSync(smPath).forEach(x=>{
-            cmd(`cp ${smPath}/${x} ${mPath}/${x}`);
+            cmd(`${ua.sudo}cp ${smPath}/${x} ${mPath}/${x}`);
         });
     }
 };
