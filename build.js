@@ -242,8 +242,10 @@ module.exports =  function(){
     if(!args.noBabel) {
         jsCode = require('babel-core').transform(jsCode, {
             presets: [
-                require('babel-preset-es2015'),
                 require('babel-preset-latest')
+            ],
+            plugins:[
+                require('babel-plugin-transform-object-assign')
             ],
             compact: true
         }).code;
