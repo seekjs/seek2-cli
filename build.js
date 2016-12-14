@@ -13,7 +13,7 @@ var log = function(...args){
 var modules = {};
 var run_modules = {};
 var require = function (mid, iniExports) {
-    if(!run_modules[mid] && modules[mid] || mid.startsWith("page.") || mid.startsWith("seekjs-plugin-") ){
+    if(!run_modules[mid] && modules[mid] || /^page\.|^seekjs\-plugin\-/.test(mid) ){
         modules[mid].mid = mid;
         if(typeof modules[mid]=="object"){
             run_modules[mid] = modules[mid];
@@ -241,7 +241,10 @@ module.exports =  function(){
     }`;
     if(!args.noBabel) {
         jsCode = require('babel-core').transform(jsCode, {
-            presets: [require('babel-preset-latest')],
+            presets: [
+                require('babel-preset-es2015'),
+                require('babel-preset-latest')
+            ],
             compact: true
         }).code;
     }
@@ -257,9 +260,9 @@ module.exports =  function(){
     log({cfg, cssList, jsList, pageList, imageList});
 
     if(fs.existsSync(distPath)){
-        cmd(`rm -rf ${distPath}`);
+       // cmd(`rm -rf ${distPath}`);
     }
-    cmd(`mkdir ${distPath}`);
+    //cmd(`mkdir ${distPath}`);
     var appJs = `${distPath}/app.js`;
     saveFile(appJs, jsCode);
     saveFile(`${distPath}/app.css`, cssCode);
