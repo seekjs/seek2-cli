@@ -1,0 +1,1 @@
+module.exports = require("sys.seek")(__filename);

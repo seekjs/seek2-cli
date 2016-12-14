@@ -3,8 +3,6 @@
 global.log = function(...args){
     console.log.apply(console, args);
 };
-var app = require("sys.app");
-log({app});
 
 var fs = require("fs");
 var {getArgs,cmd} = require("ifun");
@@ -20,6 +18,7 @@ var ua = {};
     ua.npm = process.platform=="win32" ? "npm.cmd" : "npm";
 
 var cmdList = require("./cmdList");
+cmdList.init(ua);
 Object.assign(cmdList,{
     create: require("./create"),
     build: require("./build"),

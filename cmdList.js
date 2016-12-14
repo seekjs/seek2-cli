@@ -1,8 +1,18 @@
 var {getArgs,log,cmd} = require("ifun");
 var fs = require("fs");
 
-exports.init = function(){
-    exports.create("init");
+exports.init = function(ua){
+    log({ua});
+    var mPath = `${ua.cliPath}/node_modules`;
+    if(!fs.existsSync(mPath)){
+        cmd(`mkdir ${mPath}`);
+    }
+    if(!fs.existsSync(`${mPath}/sys.seek.js`)){
+        var smPath = `${ua.cliPath}/sys_modules`;
+        fs.readdirSync(smPath).forEach(x=>{
+            cmd(`cp ${smPath}/${x} ${mPath}/${x}`);
+        });
+    }
 };
 
 //更新
