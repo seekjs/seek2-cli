@@ -5,7 +5,7 @@ global.log = function(...args){
 };
 
 var fs = require("fs");
-var {getArgs,cmd} = require("ifun");
+var {getArgs,cmd,requireJson} = require("ifun");
 var {name,version} = require("./package.json");
 
 var args = getArgs("cmd");
@@ -29,7 +29,9 @@ Object.assign(cmdList,{
 
 //查看seekjs版本
 if(args.v){
-    log(version);
+    log(`seekjs-cli: ${version}`);
+    var json = requireJson(`${__dirname}/node_modules/seekjs/package.json`);
+    json.version && log(`seekjs: ${json.version}`);
 }else if(args.cmd){
     args.cmd = args.cmd.toLowerCase();
     if(cmdList[args.cmd]){
