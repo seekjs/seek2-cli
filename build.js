@@ -30,6 +30,7 @@ var require = function (mid, iniExports) {
 var rootPath;
 var sysPath;
 var distPath;
+var appNs = {};
 var cssList = [];
 var jsList = [];
 var pageList = [];
@@ -65,17 +66,17 @@ var getConfig = function(code){
 
 //配置信息
 var getAppConfig = function (_cfg) {
-    var ns = {};
+    appNs = {};
     var typeList = {js:".js", css:".css", tp:".html", page:".sk"};
     for(let k in _cfg){
         if(/^(page|js|css|tp)$/.test(k)){
-            ns[k] = {
+            appNs[k] = {
                 path: _cfg[k],
                 type: typeList[k]
             }
         }
     }
-    seekjs.config({ns});
+    seekjs.config({ns: appNs});
 };
 
 var chkModule = function(mid, isPlugin){
@@ -164,11 +165,11 @@ var chkPage = function(mid){
             cssFile = jsFile.replace(/\.js/, ".css");
             tpFile = jsFile.replace(/\.js/, ".html");
         }else{
-            cssFile = seekjs.getPath(mid.replace("js.","css."));
-            tpFile = seekjs.getPath(mid.replace("js.","tp."));
+            cssFile = appNs.css && seekjs.getPath(mid.replace("js.","css."));  //从appNs.css拿可能更好,先这样吧
+            tpFile = appNs.tp && seekjs.getPath(mid.replace("js.","tp."));   //从appNs.tp拿可能更好,先这样吧
         }
-        _cssCode = seekjs.getCode(cssFile);
-        _tpCode = seekjs.getCode(tpFile);
+        _cssCode = cssFile ? seekjs.getCode(cssFile) : "";
+        _tpCode = tpFile ? seekjs.getCode(tpFile) : "";
         _jsCode = seekjs.getCode(jsFile);
     }
 
@@ -242,10 +243,13 @@ module.exports =  function(){
     if(!args.noBabel) {
         jsCode = require('babel-core').transform(jsCode, {
             presets: [
+                //require('babel-preset-es2015'),
                 require('babel-preset-latest')
             ],
             plugins:[
-                require('babel-plugin-transform-object-assign')
+                require('babel-plugin-transform-runtime')
+                //require('babel-plugin-transform-object-assign'),
+                //require('babel-plugin-transform-array-from')
             ],
             compact: true
         }).code;
