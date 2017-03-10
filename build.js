@@ -124,6 +124,11 @@ var chkImage = function(code){
         var newImage = parseImage(imageName, imageExt);
         return `url("${newImage}?${timestamp}")`;
     });
+    code = code.replace(/["']?(.+?)\.(png|jpg|gif|ico|bmp)["']?/g, function(_,imageName, imageExt){
+        var newImage = parseImage(imageName, imageExt);
+        return `"${newImage}?${timestamp}"`;
+    });
+    code = code.replace()
     return code;
 };
 
