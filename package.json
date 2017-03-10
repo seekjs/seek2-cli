@@ -18,14 +18,16 @@
     "babel-preset-latest": "6.16.0",
     "ifun": "0.2.8",
     "seekjs": "2.1.4",
-    "uglify-js": "2.7.4"
+    "uglify-js": "2.7.4",
+    "webpack": "2.2.1"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:seekjs/seekjs-cli.git"
   },
   "scripts": {
-    "taobao": "npm install --registry=https://registry.npm.taobao.org/"
+    "taobao": "npm install --registry=https://registry.npm.taobao.org/",
+    "build": "webpack"
   },
   "license": "MIT"
 }
