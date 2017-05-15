@@ -251,7 +251,7 @@ module.exports =  function(){
             ],
             plugins:[
                 // 先注掉,es6新函数用babel-polyfill解决, 不用webpack的话 transform-runtime貌似不起作用
-                //require('babel-plugin-transform-runtime')
+                require('babel-plugin-transform-runtime')
                 //require('babel-plugin-transform-object-assign'),
                 //require('babel-plugin-transform-array-from')
             ],
