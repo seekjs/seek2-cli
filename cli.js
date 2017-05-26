@@ -14,7 +14,8 @@ var ua = {};
     ua.cliPath = __dirname;
     ua.engine = {name,version};
     ua.user = process.env.USER || process.env.USERNAME;
-    ua.sudo = process.platform!="win32"&&ua.user!="root" ? "sudo " : "";
+    // ua.sudo = process.platform!="win32"&&ua.user!="root" ? "sudo " : "";
+    ua.sudo = '';
     ua.npm = process.platform=="win32" ? "npm.cmd" : "npm";
 
 var cmdList = require("./cmdList");
