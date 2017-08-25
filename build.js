@@ -13,7 +13,7 @@ var log = function(...args){
 var modules = {};
 var run_modules = {};
 var require = function (mid, iniExports) {
-    if(!run_modules[mid] && modules[mid] || /^page\.|^seekjs\-plugin\-/.test(mid) ){
+    if(!run_modules[mid] && modules[mid] || /^page\.|^sk2\-plugin\-/.test(mid) ){
         modules[mid].mid = mid;
         if(typeof modules[mid]=="object"){
             run_modules[mid] = modules[mid];
@@ -163,7 +163,7 @@ var chkPage = function(mid){
         var jsFile = skFile;
         var cssFile;
         var tpFile;
-        if(mid.startsWith("seekjs-plugin-")){
+        if(mid.startsWith("sk2-plugin-")){
             cssFile = jsFile.replace(/\.js/, ".css");
             tpFile = jsFile.replace(/\.js/, ".html");
         }else{
