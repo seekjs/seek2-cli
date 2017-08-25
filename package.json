@@ -1,9 +1,9 @@
 {
   "name": "seek2-cli",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "seekJs的命令行工具",
   "bin": {
-    "sk2": "./cli.js"
+    "seek2": "./cli.js"
   },
   "author": {
     "name": "Li",
